@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    android:screenOrientation="landscape"
+    tools:context="com.joaoaraujo.mindX_android.Activity_Settings">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Connection Status"
+            android:textStyle="bold"
+            android:layout_marginBottom="@dimen/text_size_small"
+            />
+
+
+        <TextView
+            android:id="@+id/connectFeedback"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No headset found"
+            android:textColor="#F00"
+            />
+
+        <LinearLayout
+            android:layout_marginTop="@dimen/text_size_large"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/attract_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Attractor force: 0.40"
+                android:textStyle="bold" />
+
+            <SeekBar android:id="@+id/attract_bar"
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+                     android:max="18"
+                     android:progress="8"
+                     android:progressBackgroundTint="#55F"
+                     android:progressTint="#00F"
+                     android:thumbTint="#009"/>
+
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Threshold Set"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            />
+
+        <LinearLayout
+            android:layout_marginTop="@dimen/text_size_large"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Up Range"
+                android:textAlignment="textEnd"
+                android:textStyle="normal" />
+
+            <EditText
+                android:layout_marginStart="8dp"
+                android:layout_weight="2"
+                android:id="@+id/upRangeBox"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:inputType="numberDecimal"
+                android:background="#FFF"
+                android:textColor="#000" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Goal Up"
+                android:textAlignment="textEnd"
+                android:textStyle="normal" />
+
+            <EditText
+                android:layout_marginStart="8dp"
+                android:layout_weight="2"
+                android:id="@+id/upGoalBox"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:inputType="numberDecimal"
+                android:background="#FFF"
+                android:textColor="#000"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Baseline Up"
+                android:textAlignment="textEnd"
+                android:textStyle="normal" />
+
+            <EditText
+                android:layout_marginStart="8dp"
+                android:layout_weight="2"
+                android:id="@+id/upBaseBox"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:inputType="numberDecimal"
+                android:background="#FFF"
+                android:textColor="#000"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_marginTop="@dimen/text_size_large"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Down Range"
+                android:textAlignment="textEnd"
+                android:textStyle="normal" />
+
+            <EditText
+                android:layout_marginStart="8dp"
+                android:layout_weight="2"
+                android:id="@+id/downRangeBox"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:inputType="numberDecimal"
+                android:background="#FFF"
+                android:textColor="#000"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Goal Down"
+                android:textAlignment="textEnd"
+                android:textStyle="normal" />
+
+            <EditText
+                android:layout_marginStart="8dp"
+                android:layout_weight="2"
+                android:id="@+id/downGoalBox"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:inputType="numberDecimal"
+                android:background="#FFF"
+                android:textColor="#000"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Baseline Down"
+                android:textAlignment="textEnd"
+                android:textStyle="normal" />
+
+            <EditText
+                android:layout_marginStart="8dp"
+                android:layout_weight="2"
+                android:id="@+id/downBaseBox"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
+                android:layout_width="0dp"
+                android:background="#FFF"
+                android:textColor="#000"/>
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/btn_scan"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Refresh BLE Scan" />
+
+        <!--<Button
+            android:textStyle="bold"
+            android:id="@+id/btn_game"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:text="Start Game"
+            /> -->
+
+
+    </LinearLayout>
+
+
+</LinearLayout>

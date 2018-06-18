@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="wrap_content"
+android:orientation="vertical"
+android:layout_height="55dip"
+android:padding="10sp"
+tools:context="com.joaoaraujo.mindX_android.Activity_Menu">
+
+<LinearLayout
+    android:layout_marginStart="@dimen/text_size_large"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_centerVertical="true"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_weight="1">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:layout_centerVertical="true"
+                android:id="@+id/child_menu_img"
+                android:layout_width="match_parent"
+                android:layout_height="22sp"
+                />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_weight="5"
+        android:paddingStart="@dimen/text_size_small">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/lblListItem"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textSize="17dip"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"/>
+
+        </RelativeLayout>
+
+
+    </LinearLayout>
+
+</LinearLayout>
+
+</RelativeLayout>

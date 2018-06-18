@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:screenOrientation="landscape"
+    android:id="@+id/parentView"
+    tools:context="com.joaoaraujo.mindX_android.Activity_Games">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+    <FrameLayout
+        android:id="@+id/sketch_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+    </LinearLayout>
+
+    <View
+        android:id="@+id/loading_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000"
+        android:alpha="0.5"
+        />
+
+    <TextView
+        android:id="@+id/loading_text"
+        android:layout_marginTop="@dimen/text_size_small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Connecting..."
+        android:textStyle="bold"
+        android:layout_centerInParent="true"
+        />
+
+    <ImageView
+        android:id="@+id/portal_yellow"
+        android:src ="@drawable/portal"
+        android:layout_height="0dp"
+        android:layout_width="0dp"
+        android:visibility="gone"
+        />
+
+    <ImageView
+        android:id="@+id/portal_green"
+        android:src ="@drawable/portal_success"
+        android:layout_height="0dp"
+        android:layout_width="0dp"
+        android:visibility="gone"
+        />
+
+    <ImageView
+        android:id="@+id/space_background"
+        android:src ="@drawable/space"
+        android:layout_height="0dp"
+        android:layout_width="0dp"
+        android:visibility="gone"
+        />
+
+    <ImageView
+        android:id="@+id/spaceship"
+        android:src ="@drawable/spaceship_white"
+        android:layout_height="0dp"
+        android:layout_width="0dp"
+        android:visibility="gone"
+        />
+
+</RelativeLayout>
+
