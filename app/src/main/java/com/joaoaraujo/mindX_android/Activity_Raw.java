@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
@@ -32,40 +33,40 @@ public class Activity_Raw extends AppCompatActivity {
             switch (msg.what) {
                 case BluetoothService.RECIEVE_MESSAGE:
 
+                    long time1 = System.currentTimeMillis();
+
                     byte[] readBuf = (byte[]) msg.obj;
 
-                    float[] channel_array = new float[625];
+                    double[] channel_array = new double[625];
                     int [] channel_id = new int[5];
                     int cursor_float = 0;
                     int cursor_channel_id = 0;
 
-                    byte[] byte_float = new byte[4];
 
-                    for (int i = 0; i < 2520; i++) {
+                    for (int i = 0; i < 2520; i+=4) {
 
                         if (i == 0 || i == 504 || i == 1008 || i == 1512 || i == 2016) {
-                            Log.e("i",Byte.toString(readBuf[i+3]));
+                            //Log.e("i",Byte.toString(readBuf[i+3]));
                             channel_id[cursor_channel_id] = readBuf[i+3];
                             cursor_channel_id +=1;
-                            i += 3;
                         } else {
 
-                            byte_float[3 - (i % 4)] = readBuf[i];
+                            byte[] byte_float = new byte[4];
+                            byte_float[0] = readBuf[i+3];
+                            byte_float[1] = readBuf[i+2];
+                            byte_float[2] = readBuf[i+1];
+                            byte_float[3] = readBuf[i];
 
-                            if (i > 0 && (i % 4) == 3) {
-                                channel_array[cursor_float] = ByteBuffer.wrap(byte_float).getFloat();
-                                cursor_float += 1;
-                                byte_float = new byte[4];
-                            }
+                            channel_array[cursor_float] = ByteBuffer.wrap(byte_float).getFloat();
+                            cursor_float += 1;
 
                         }
                     }
 
-                    //Toast.makeText(getApplicationContext(),
-                    //      "Packet received. Size: " + readBuf.length, Toast.LENGTH_SHORT).show();
-                    float[] ordered_channels = new float[625];
+                    double[] ordered_channels = new double[625];
                     int channel_cursor = 1;
-                    for(int i = 0; i < channel_id.length; i++){
+                    for(int i = 0; i < channel_id.length+1; i++){
+
                         if(channel_id[i] == channel_cursor){
                             System.arraycopy(channel_array, i*125, ordered_channels,
                                     (channel_cursor-1)*125, 125);
@@ -76,9 +77,14 @@ public class Activity_Raw extends AppCompatActivity {
                                 break;
                         }
                     }
+                    //double [] channel_1 = new double[125];
+                    //System.arraycopy(ordered_channels, 0, channel_1, 0, 125);
+                    //Log.e("Mean Channel 1",Double.toString(mean(channel_1)));
 
-                    if(doUpdates)
-                        updateData(125, ordered_channels);
+                    if(doUpdates) {
+
+                        updateData(125, channel_array,channel_id);
+                    }
 
                     break;
             }
@@ -89,19 +95,24 @@ public class Activity_Raw extends AppCompatActivity {
         return bluetoothHandler;
     }
 
+    Intent bluetoothServiceIntent;
+    boolean serviceIsBound = false;
+
     ServiceConnection BluetoothServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            msg("Connected");
+            msg("Service bound");
+            serviceIsBound = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            msg("Disconnected");
+            msg("Service unbound");
+            serviceIsBound = false;
         }
     };
 
-    private static GraphView raw_eeg_graph1,raw_eeg_graph2,raw_eeg_graph3,raw_eeg_graph4,raw_eeg_graph5;
+    GraphView raw_eeg_graph1,raw_eeg_graph2,raw_eeg_graph3,raw_eeg_graph4,raw_eeg_graph5;
     private static LineGraphSeries<DataPoint> raw_eeg_series1,raw_eeg_series2,raw_eeg_series3,raw_eeg_series4,raw_eeg_series5;
     private static final int max_datapoints = 2500; // maximum datapoints = 5 seconds
     private final int Fs = 500; // sampling freq
@@ -214,38 +225,65 @@ public class Activity_Raw extends AppCompatActivity {
         raw_eeg_graph4.addSeries(raw_eeg_series4);
         raw_eeg_graph5.addSeries(raw_eeg_series5);
 
-        doUpdates = true;
-
-        this.bindService(new Intent(this,BluetoothService.class),BluetoothServiceConnection , Context.BIND_AUTO_CREATE);
-        startService(new Intent(this, BluetoothService.class));
-
     }
 
     public void msg(String s) {
         Toast.makeText(getApplicationContext(), s, Toast.LENGTH_LONG).show();
     }
 
-    @Override
-    protected void onResume(){
-        super.onResume();
-        /*mTimer1 = new Runnable() {
-            @Override
-            public void run() {
-                generateData(125);
 
-                mHandler.postDelayed(this, 500);
-            }
-        };
-        mHandler.postDelayed(mTimer1, 500);*/
+    @Override
+    public void onStart(){
+        super.onStart();
+        doUpdates = true;
+        Utils.boardMode = 0;
+        bluetoothServiceIntent = new Intent(this, BluetoothService.class);
+        startService(bluetoothServiceIntent);
+        bindService(bluetoothServiceIntent,BluetoothServiceConnection , Context.BIND_AUTO_CREATE);
     }
 
     @Override
     public void onPause() {
-        //mHandler.removeCallbacks(mTimer1);
         super.onPause();
+        if(serviceIsBound) {
+            unbindService(BluetoothServiceConnection);
+            serviceIsBound = false;
+        }
     }
 
-    private void generateData(int datapoints) {
+    @Override
+    protected void onResume(){
+        super.onResume();
+        if(!serviceIsBound) {
+            bindService(bluetoothServiceIntent, BluetoothServiceConnection, Context.BIND_AUTO_CREATE);
+            serviceIsBound = true;
+        }
+
+    }
+
+    @Override
+    protected void onStop() {
+        if(serviceIsBound) {
+            unbindService(BluetoothServiceConnection);
+            serviceIsBound = false;
+        }
+        stopService(bluetoothServiceIntent);
+
+        super.onStop();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(serviceIsBound) {
+            unbindService(BluetoothServiceConnection);
+            serviceIsBound = false;
+        }
+            stopService(bluetoothServiceIntent);
+
+        finish();
+    }
+
+    /*private void generateData(int datapoints) {
 
         Iterator series_itr = raw_eeg_series1.getValues(0,  max_datapoints);
         DataPoint[] new_series = new DataPoint[max_datapoints];
@@ -271,10 +309,12 @@ public class Activity_Raw extends AppCompatActivity {
         raw_eeg_graph1.removeAllSeries();
         raw_eeg_graph1.addSeries(raw_eeg_series1);
 
-    }
+    }*/
 
 
-    public static void updateData(int datapoints, float[] data) {
+    public static void updateData(int datapoints, double[] data, int[] channel_id) {
+
+        long time1 = System.currentTimeMillis();
 
         Iterator series_itr1 = raw_eeg_series1.getValues(0,  max_datapoints);
         Iterator series_itr2 = raw_eeg_series2.getValues(0,  max_datapoints);
@@ -322,53 +362,46 @@ public class Activity_Raw extends AppCompatActivity {
         }
 
         int cursor_float = 0;
-        for(int i = max_datapoints-datapoints; i <max_datapoints; i++) {
-            DataPoint v1 = new DataPoint(i,data[cursor_float]);
-            DataPoint v2 = new DataPoint(i,data[125+cursor_float]);
-            DataPoint v3 = new DataPoint(i,data[250+cursor_float]);
-            DataPoint v4 = new DataPoint(i,data[325+cursor_float]);
-            DataPoint v5 = new DataPoint(i,data[450+cursor_float]);
+        for(int j = 0; j < channel_id.length; j++) {
+            int channel = channel_id[j];
+            for (int i = max_datapoints - datapoints; i < max_datapoints; i++) {
+                /*DataPoint v1 = new DataPoint(i, data[cursor_float]);
+                DataPoint v2 = new DataPoint(i, data[125 + cursor_float]);
+                DataPoint v3 = new DataPoint(i, data[250 + cursor_float]);
+                DataPoint v4 = new DataPoint(i, data[325 + cursor_float]);
+                DataPoint v5 = new DataPoint(i, data[450 + cursor_float]);*/
 
-            new_series1[i] = v1;new_series2[i] = v2;new_series3[i] = v3;
-            new_series4[i] = v4;new_series5[i] = v5;
+                DataPoint v = new DataPoint(i, data[cursor_float]);
 
-            cursor_float +=1;
+                if(channel == 1)new_series1[i] = v;
+                if(channel == 2)new_series2[i] = v;
+                if(channel == 3)new_series3[i] = v;
+                if(channel == 4)new_series4[i] = v;
+                if(channel == 5)new_series5[i] = v;
 
+                cursor_float += 1;
+
+            }
         }
 
-        raw_eeg_series1 = new LineGraphSeries<>(new_series1);
-        raw_eeg_series1.setColor(Color.BLUE);
-        raw_eeg_graph1.removeAllSeries();
-        raw_eeg_graph1.addSeries(raw_eeg_series1);
+        raw_eeg_series1.resetData(new_series1);
+        raw_eeg_series2.resetData(new_series2);
+        raw_eeg_series3.resetData(new_series3);
+        raw_eeg_series4.resetData(new_series4);
+        raw_eeg_series5.resetData(new_series5);
 
-        raw_eeg_series2 = new LineGraphSeries<>(new_series2);
-        raw_eeg_series2.setColor(Color.BLUE);
-        raw_eeg_graph2.removeAllSeries();
-        raw_eeg_graph2.addSeries(raw_eeg_series2);
-
-        raw_eeg_series3 = new LineGraphSeries<>(new_series3);
-        raw_eeg_series3.setColor(Color.BLUE);
-        raw_eeg_graph3.removeAllSeries();
-        raw_eeg_graph3.addSeries(raw_eeg_series3);
-
-        raw_eeg_series4 = new LineGraphSeries<>(new_series4);
-        raw_eeg_series4.setColor(Color.BLUE);
-        raw_eeg_graph4.removeAllSeries();
-        raw_eeg_graph4.addSeries(raw_eeg_series4);
-
-        raw_eeg_series5 = new LineGraphSeries<>(new_series5);
-        raw_eeg_series5.setColor(Color.BLUE);
-        raw_eeg_graph5.removeAllSeries();
-        raw_eeg_graph5.addSeries(raw_eeg_series5);
+        //Log.e("Timestamp3",Long.toString(System.currentTimeMillis() - BluetoothService.time1));
 
 
     }
 
 
-    @Override
-    protected void onStop() {
-        unbindService(BluetoothServiceConnection);
-        super.onStop();
+    private static double mean(double[] m) {
+        double sum = 0;
+        for (int i = 0; i < m.length; i++) {
+            sum += m[i];
+        }
+        return sum / m.length;
     }
 
 

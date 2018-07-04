@@ -51,14 +51,16 @@ public class BluetoothService extends Service {
 
     private Set<BluetoothDevice> pairedDevices;
     private boolean isBtConnected = false;
-    private ConnectedThread connectedThread;
-    BluetoothSocket btSocket = null;
     String address = null;
-    boolean isStarting = true;
+    boolean isStarting, handshake;
+    public static long time1;
 
     @Override
     public void onCreate() {
+        isStarting = true;
+        handshake = false;
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        time1 = System.currentTimeMillis();
 
 
         Log.d("BluetoothService", "Service started");
@@ -67,7 +69,15 @@ public class BluetoothService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        mHandler = Activity_Raw.getHandler();
+        switch (Utils.boardMode){
+            case 0:
+                mHandler = Activity_Raw.getHandler();
+                break;
+            case 1:
+                mHandler = Activity_Games.getHandler();
+                break;
+
+        }
         return mBinder;
     }
 
@@ -86,7 +96,6 @@ public class BluetoothService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        msg("Connecting to device...");
 
         pairedDevices = mBluetoothAdapter.getBondedDevices();
 
@@ -97,6 +106,7 @@ public class BluetoothService extends Service {
                 //if (bt.getAddress().equals("7C:F9:0E:F6:70:D4")) {
                 if (bt.getName().equals("MindreachBT") && bt.getAddress().equals("00:07:80:3C:55:04")) {
                     //msg("FOUND MINDREACH HEADSET");
+                    msg("Connecting to device...");
                     address = bt.getAddress();
                     connectToDevice(address);
                     break;
@@ -128,7 +138,7 @@ public class BluetoothService extends Service {
     }
 
     private void setState(int state) {
-        BluetoothService.mState = state;
+        mState = state;
         if (mHandler != null) {
             mHandler.obtainMessage(MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
         }
@@ -168,12 +178,10 @@ public class BluetoothService extends Service {
     }
 
     private void connectionFailed() {
+        isBtConnected = false;
         BluetoothService.this.stop();
-        Message msg = mHandler.obtainMessage(MESSAGE_TOAST);
-        Bundle bundle = new Bundle();
-        bundle.putString(TOAST, "CONNECTION FAILED");
-        msg.setData(bundle);
-        mHandler.sendMessage(msg);
+        Toast.makeText(getApplicationContext(), "Connection Failed!", Toast.LENGTH_LONG).show();
+
     }
 
     private void connectionLost() {
@@ -198,6 +206,7 @@ public class BluetoothService extends Service {
             mConnectedThread = null;
         }
 
+        isBtConnected = true;
         mConnectedThread = new ConnectedThread(mmSocket);
         mConnectedThread.start();
 
@@ -261,10 +270,16 @@ public class BluetoothService extends Service {
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
-        byte[] start_byte = {0x77, 0x62};
+        byte[] start_byte = new byte[2];
+        private int packet_size = 0;
+        byte[] buffer;
+        byte handshakeByte;
+        long time1 = System.currentTimeMillis();
+        boolean isfirstTry = true;
+
+
         int reading_cursor = 0;
         boolean foundFirst = false;
-        byte[] buffer = new byte[2520];
 
         public ConnectedThread(BluetoothSocket socket) {
             mmSocket = socket;
@@ -283,36 +298,74 @@ public class BluetoothService extends Service {
         @Override
         public void run() {
 
+            switch (Utils.boardMode)
+            {
+                case 0: // Raw signal mode
+                    start_byte[0] = 0x77;
+                    start_byte[1] = 0x62;
+                    packet_size = 2520;
+                    buffer = new byte[packet_size];
+                    handshakeByte = 0x05;
+                    break;
+
+                case 1: // Game (decoder) mode
+                    start_byte[0] = 0x77;
+                    start_byte[1] = 0x61;
+                    packet_size = 8;
+                    buffer = new byte[packet_size];
+                    handshakeByte = 0x07;
+                    break;
+
+            }
+
             // Keep listening to the InputStream until an exception occurs
-            while (true) {
+            while (isBtConnected) {
                 try {
                     // buffer store for the stream
                     int bytes; // bytes returned from read()
                     // Read from the InputStream
                     if (mmInStream.available() > 0) {
-                        isStarting = false;
-                        byte[] temp_buffer = new byte[2520];
+                        byte[] temp_buffer = new byte[packet_size];
 
                         if (!foundFirst) {
                             bytes = mmInStream.read(temp_buffer);
 
-                            if (bytes >= 4
-                                    && (temp_buffer[0] & 0xFF) == 0xFF
-                                    && (temp_buffer[1] & 0xFF) == 0xFF
-                                    && (temp_buffer[2] & 0xFF) == 0x00) {
+                            if(!handshake){
+                                for(int i = 0; i < bytes; i++)
+                                if((temp_buffer[0] & 0xFF) == handshakeByte){
+                                    //int mybyte = (temp_buffer[0] & 0xFF);
+                                    handshake = true;
+                                    break;
 
-                                for (int i = 0; i < bytes; i++) {
-                                    buffer[i + reading_cursor] = (byte) (temp_buffer[i] & 0xFF);
+                                } else {
+                                        if(i == 0) {
+                                            if(isfirstTry) {
+                                                mmOutStream.write(start_byte);
+                                                time1 = System.currentTimeMillis();
+                                                isfirstTry = false;
+                                            }
+                                        }
+                                    }
+                            }else {
+                                if (bytes >= 4
+                                        && (temp_buffer[0] & 0xFF) == 0xFF
+                                        && (temp_buffer[1] & 0xFF) == 0xFF
+                                        && (temp_buffer[2] & 0xFF) == 0x00) {
+
+                                    for (int i = 0; i < bytes; i++) {
+                                        buffer[i + reading_cursor] = (byte) (temp_buffer[i] & 0xFF);
+                                    }
+
+                                    reading_cursor += bytes;
+                                    foundFirst = true;
                                 }
-
-                                reading_cursor += bytes;
-                                foundFirst = true;
                             }
-                        } else {
+                        }
+                        else {
 
-                            if (mmInStream.available() + reading_cursor > 2520)
+                            if (mmInStream.available() + reading_cursor > packet_size)
                                 bytes = mmInStream.read(temp_buffer, 0, mmInStream.available()
-                                        - ((mmInStream.available() + reading_cursor) - 2520));
+                                        - ((mmInStream.available() + reading_cursor) - packet_size));
 
                             else bytes = mmInStream.read(temp_buffer, 0, mmInStream.available());
 
@@ -323,18 +376,24 @@ public class BluetoothService extends Service {
                             reading_cursor += bytes;
 
 
-                            if (reading_cursor == 2520) {
+                            if (reading_cursor == packet_size) {
                                 reading_cursor = 0;
                                 mHandler.obtainMessage(RECIEVE_MESSAGE, buffer).sendToTarget(); // Send to message queue Handler
-                                buffer = new byte[2520];
+                                buffer = new byte[packet_size];
                                 //foundFirst = false;
+                                long time2 = System.currentTimeMillis();
+                                Log.e("Timestamp", Long.toString(time2-time1));
+                                time1 = time2;
                             }
                         }
-                    } else if (isStarting) {
-                        mmOutStream.write(start_byte);
-                        //isStarting = false;
+                    } else if (!handshake) {
+                        if(isfirstTry) {
+                            mmOutStream.write(start_byte);
+                            time1 = System.currentTimeMillis();
+                            isfirstTry = false;
+                        }
                     } else {
-                        int var = 0;
+                        //isStarting = true;
                     }
 
                 } catch (IOException e) {
@@ -342,6 +401,12 @@ public class BluetoothService extends Service {
                     break;
                 }
 
+            }
+            try{
+                byte[] exitMode = {0x4E,0x4F};
+                mmOutStream.write(exitMode);
+            } catch (IOException e) {
+                msg("Stream input/output exception: " + e);
             }
         }
 
@@ -358,9 +423,15 @@ public class BluetoothService extends Service {
     }
 
     @Override
+    public boolean onUnbind(Intent intent) {
+
+        isBtConnected = false;
+        return false;
+    }
+
+    @Override
     public void onDestroy() {
-        stop();
-        Log.d("Printer Service", "Destroyed");
+        this.stop();
         super.onDestroy();
     }
 

@@ -14,6 +14,8 @@ import com.joaoaraujo.mindX_android.Activity_Settings;
 
 public class Utils {
 
+    public static int boardMode = 0;
+
     public static boolean checkBluetooth(BluetoothAdapter bluetoothAdapter) {
 
         // Ensures Bluetooth is available on the device and it is enabled. If not,

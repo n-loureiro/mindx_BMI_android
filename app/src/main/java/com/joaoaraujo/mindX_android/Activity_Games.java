@@ -1,5 +1,7 @@
 package com.joaoaraujo.mindX_android;
 
+import android.app.Activity;
+import android.app.Fragment;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.ComponentName;
@@ -9,9 +11,11 @@ import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,7 +26,10 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.IOException;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -33,6 +40,7 @@ import java.util.Random;
 
 import processing.android.CompatUtils;
 import processing.android.PFragment;
+import processing.core.PGraphics;
 import processing.core.PImage;
 
 public class Activity_Games extends AppCompatActivity {
@@ -48,17 +56,19 @@ public class Activity_Games extends AppCompatActivity {
     private final int ENDING_GAME = 2;
 
     boolean positionBytes = false;
-    public SketchCursor sketchCursor;
-    public SketchSpace sketchSpace;
-    public SketchHeading sketchHeading;
+    public static SketchCursor sketchCursor;
+    public static SketchSpace sketchSpace;
+    public static SketchHeading sketchHeading;
 
     private double[] thresholds;
     private double attractor_weight;
-    private int gameId;
+    public static int gameId;
 
     public static boolean runUpdates;
 
-    RelativeLayout parentView; View loadingView; TextView loadingText;
+    public static  RelativeLayout parentView;
+    public static  View loadingView;
+    public static  TextView loadingText;
 
     public static long time1;
     public static String ts;
@@ -66,14 +76,155 @@ public class Activity_Games extends AppCompatActivity {
     public static PImage shipSprite, spaceBack, portal, portal_success, portal_sprite;
 
     PFragment fragment;
+    public static Handler bluetoothHandler = new Handler() {
+        public void handleMessage(android.os.Message msg) {
+            if(msg.obj != null)
+                switch (msg.what) {
+                    case BluetoothService.RECIEVE_MESSAGE:
 
+                        long time1 = System.currentTimeMillis();
+
+                        byte[] readBuf = (byte[]) msg.obj;
+
+                        double decoderPos = 0;
+
+                        byte[] byte_float = new byte[4];
+
+                        for (int i = 0; i < 8; i++) {
+
+                            if (i == 0) {
+                                //Log.e("Mode Byte",Byte.toString(readBuf[i+3]));
+                                i += 3;
+                            } else {
+
+                                byte_float[3 - (i % 4)] = readBuf[i];
+
+                                if (i > 0 && (i % 4) == 3) {
+                                    decoderPos = ByteBuffer.wrap(byte_float).getFloat();
+                                }
+
+                            }
+                        }
+
+
+                        //System.arraycopy(ordered_channels, 0, channel_1, 0, 125);
+                        Log.e("Decoder Value",Double.toString(decoderPos));
+                        loadingText.setVisibility(View.GONE);
+                        loadingView.setVisibility(View.GONE);
+
+
+                        switch(gameId){
+                            case 0: { // Cursor
+                                sketchCursor.BMI_update((float)decoderPos);
+                                break;
+                            }
+
+                            case 1: { // Heading
+                                sketchHeading.BMI_update((float)decoderPos);
+                                break;
+                            }
+
+                            case 2: { // Space portals
+                                sketchSpace.BMI_update((float)decoderPos);
+                                break;
+                            }
+
+                            default: break;
+                        }
+
+
+                        break;
+                }
+        }
+    };
+
+    public static Handler getHandler() {
+        return bluetoothHandler;
+    }
+
+    Intent bluetoothServiceIntent;
+    boolean serviceIsBound = false;
+
+    ServiceConnection BluetoothServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            msg("Loading...");
+            serviceIsBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            msg("Service unbound");
+            serviceIsBound = false;
+        }
+    };
+
+    public void msg(String s) {
+        Toast.makeText(getApplicationContext(), s, Toast.LENGTH_LONG).show();
+    }
+
+    public class Task extends AsyncTask<Void, Void, Void> {
+        protected Void doInBackground(Void ... voids) {
+
+            switch(gameId){
+                case 0: { // Cursor
+                    sketchCursor = new SketchCursor(thresholds,attractor_weight);
+                    fragment = new PFragment(sketchCursor);
+                    break;
+                }
+
+                case 1: { // Heading
+                    sketchHeading = new SketchHeading(thresholds, attractor_weight);
+                    fragment = new PFragment(sketchHeading);
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException e){
+                        e.printStackTrace();
+                    }
+                    break;
+                }
+
+                case 2: { // Space portals
+                    ImageView space_IV = findViewById(R.id.space_background);
+                    Bitmap space_bitmap = ((BitmapDrawable)space_IV.getDrawable()).getBitmap();
+                    spaceBack = new PImage(space_bitmap);
+                    ImageView spaceship_IV = findViewById(R.id.spaceship);
+                    Bitmap spaceship_bitmap = ((BitmapDrawable)spaceship_IV.getDrawable()).getBitmap();
+                    shipSprite = new PImage(spaceship_bitmap);
+                    ImageView portal_IV = findViewById(R.id.portal_yellow);
+                    Bitmap portal_bitmap = ((BitmapDrawable)portal_IV.getDrawable()).getBitmap();
+                    portal = new PImage(portal_bitmap);
+                    ImageView portalSuccess_IV = findViewById(R.id.portal_green);
+                    Bitmap portalSuccess_bitmap = ((BitmapDrawable)portalSuccess_IV.getDrawable()).getBitmap();
+                    portal_success = new PImage(portalSuccess_bitmap);
+                    sketchSpace = new SketchSpace(thresholds,attractor_weight,getApplicationContext());
+                    fragment = new PFragment(sketchSpace);
+                    break;
+                }
+
+                default: break;
+            }
+
+            return null;
+        }
+
+        protected void onPostExecute(Void voids) {
+            fragment.setView(findViewById(R.id.sketch_container), activity);
+
+           }
+    }
+
+
+    FragmentActivity activity;
+    Bundle saved;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
-
+        saved = savedInstanceState;
         setContentView(R.layout.activity_games);
+
+        activity = this;
 
         parentView = findViewById(R.id.parentView);
         loadingView = parentView.findViewById(R.id.loading_background);
@@ -85,79 +236,58 @@ public class Activity_Games extends AppCompatActivity {
 
         thresholds = intent.getDoubleArrayExtra(Activity_Games.EXTRA_THRESHOLDS);
         attractor_weight = intent.getDoubleExtra(Activity_Games.EXTRA_ATTRACTORWEIGHT,0.0 );
-        gameId = intent.getIntExtra(Activity_Games.EXTRA_GAMEID,0 );
+        gameId = intent.getIntExtra(Activity_Games.EXTRA_GAMEID,1 );
+        new Task().execute();
 
-        if(gameId == 2){
-            ImageView space_IV = findViewById(R.id.space_background);
-            Bitmap space_bitmap = ((BitmapDrawable)space_IV.getDrawable()).getBitmap();
-            spaceBack = new PImage(space_bitmap);
-            ImageView spaceship_IV = findViewById(R.id.spaceship);
-            Bitmap spaceship_bitmap = ((BitmapDrawable)spaceship_IV.getDrawable()).getBitmap();
-            shipSprite = new PImage(spaceship_bitmap);
-            ImageView portal_IV = findViewById(R.id.portal_yellow);
-            Bitmap portal_bitmap = ((BitmapDrawable)portal_IV.getDrawable()).getBitmap();
-            portal = new PImage(portal_bitmap);
-            ImageView portalSuccess_IV = findViewById(R.id.portal_green);
-            Bitmap portalSuccess_bitmap = ((BitmapDrawable)portalSuccess_IV.getDrawable()).getBitmap();
-            portal_success = new PImage(portalSuccess_bitmap);
-        }
-
-        time1 = System.currentTimeMillis();
-
-        switch(gameId){
-            case 0: { // Cursor
-                sketchCursor = new SketchCursor(thresholds,attractor_weight);
-                fragment = new PFragment(sketchCursor);
-                fragment.setView(findViewById(R.id.sketch_container), this);
-                break;
-            }
-
-            case 1: { // Heading
-                sketchHeading = new SketchHeading(thresholds, attractor_weight);
-                fragment = new PFragment(sketchHeading);
-                fragment.setView(findViewById(R.id.sketch_container), this);
-                break;
-            }
-
-            case 2: { // Space portals
-                sketchSpace = new SketchSpace(thresholds,attractor_weight,getApplicationContext());
-                fragment = new PFragment(sketchSpace);
-                fragment.setView(findViewById(R.id.sketch_container), this);
-                break;
-            }
-
-            default: break;
-        }
     }
 
     @Override
-    protected void onStart() {
+    protected void onStart(){
         super.onStart();
-        runUpdates = true;
-        position_update.start();
+        Utils.boardMode = 1;
+        bluetoothServiceIntent = new Intent(this, BluetoothService.class);
+        startService(bluetoothServiceIntent);
+        bindService(bluetoothServiceIntent,BluetoothServiceConnection , Context.BIND_AUTO_CREATE);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        if(!serviceIsBound) {
+            bindService(bluetoothServiceIntent, BluetoothServiceConnection, Context.BIND_AUTO_CREATE);
+            serviceIsBound = true;
+        }
     }
 
     @Override
     public void onBackPressed() {
-        runUpdates = false;
-        if(Activity_Start.crucialUpdate != null)
-            Activity_Start.crucialUpdate.setValue(new byte[0]);
-        if(position_update != null && position_update.isAlive()) position_update.interrupt();
-        position_update = null;
+        if(serviceIsBound) {
+            unbindService(BluetoothServiceConnection);
+            serviceIsBound = false;
+        }
+        stopService(bluetoothServiceIntent);
+
         finish();
     }
 
     @Override
     public void onStop(){
-        runUpdates = false;
-        if(position_update != null && position_update.isAlive()) position_update.interrupt();
-        position_update = null;
+        if(serviceIsBound) {
+            unbindService(BluetoothServiceConnection);
+            serviceIsBound = false;
+        }
+        stopService(bluetoothServiceIntent);
+
         super.onStop();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(serviceIsBound) {
+            unbindService(BluetoothServiceConnection);
+            serviceIsBound = false;
+        }
     }
 
     public static byte data[] = new byte[501];

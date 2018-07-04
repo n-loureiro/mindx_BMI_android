@@ -107,7 +107,7 @@ public class Activity_Start extends AppCompatActivity implements View.OnClickLis
             //String provider = Settings.Secure.getString(getContentResolver(), Settings.Secure.LOCATION_MODE);
             //if (provider == null || provider.isEmpty()) {
             //pairedDevicesList();
-            startService(new Intent(this, BluetoothService.class));
+            //startService(new Intent(this, BluetoothService.class));
 
         }
 

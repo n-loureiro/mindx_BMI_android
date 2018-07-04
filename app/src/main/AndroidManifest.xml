@@ -35,6 +35,9 @@
         <activity android:name=".Activity_Raw"
             android:screenOrientation="landscape"/>
 
+        <activity android:name=".Activity_Check"
+            android:screenOrientation="landscape"/>
+
         <!--<service
             android:name=".Service_BTLE_GATT"
             android:enabled="true"
