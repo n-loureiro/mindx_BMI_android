@@ -17,6 +17,8 @@ import android.widget.Toast;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
+import com.jjoe64.graphview.GridLabelRenderer;
+
 
 import java.nio.ByteBuffer;
 import java.util.Iterator;
@@ -198,6 +200,14 @@ public class Activity_Raw extends AppCompatActivity {
         raw_eeg_graph5.getGridLabelRenderer().setHorizontalLabelsVisible(false);
         raw_eeg_graph5.getGridLabelRenderer().setVerticalLabelsVisible(false);
 
+        raw_eeg_graph1.getGridLabelRenderer().setGridStyle( GridLabelRenderer.GridStyle.NONE );
+        raw_eeg_graph2.getGridLabelRenderer().setGridStyle( GridLabelRenderer.GridStyle.NONE );
+        raw_eeg_graph3.getGridLabelRenderer().setGridStyle( GridLabelRenderer.GridStyle.NONE );
+        raw_eeg_graph4.getGridLabelRenderer().setGridStyle( GridLabelRenderer.GridStyle.NONE );
+        raw_eeg_graph5.getGridLabelRenderer().setGridStyle( GridLabelRenderer.GridStyle.NONE );
+
+
+
         raw_eeg_series1 = new LineGraphSeries<>();
         raw_eeg_series2 = new LineGraphSeries<>();
         raw_eeg_series3 = new LineGraphSeries<>();
@@ -213,11 +223,15 @@ public class Activity_Raw extends AppCompatActivity {
             raw_eeg_series5.appendData(v, false, max_datapoints, true);
         }
 
-        raw_eeg_series1.setColor(Color.BLUE);
-        raw_eeg_series2.setColor(Color.BLUE);
-        raw_eeg_series3.setColor(Color.BLUE);
-        raw_eeg_series4.setColor(Color.BLUE);
-        raw_eeg_series5.setColor(Color.BLUE);
+        raw_eeg_series1.setColor(Color.rgb(165, 181, 255));
+        raw_eeg_series2.setColor(Color.rgb(165, 181, 255));
+        raw_eeg_series3.setColor(Color.rgb(165, 181, 255));
+        raw_eeg_series4.setColor(Color.rgb(165, 181, 255));
+        raw_eeg_series5.setColor(Color.rgb(165, 181, 255));
+
+
+
+
 
         raw_eeg_graph1.addSeries(raw_eeg_series1);
         raw_eeg_graph2.addSeries(raw_eeg_series2);
