@@ -1,5 +1,6 @@
 package com.joaoaraujo.mindX_android;
 
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -22,6 +23,7 @@ import java.util.Iterator;
 
 public class Activity_Check extends AppCompatActivity {
 
+    @SuppressLint("HandlerLeak")
     public static Handler bluetoothHandler = new Handler() {
         public void handleMessage(android.os.Message msg) {
             if(msg.obj != null)

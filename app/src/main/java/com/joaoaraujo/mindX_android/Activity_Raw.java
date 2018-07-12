@@ -1,5 +1,6 @@
 package com.joaoaraujo.mindX_android;
 
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -29,6 +30,7 @@ import static java.lang.Math.random;
 
 public class Activity_Raw extends AppCompatActivity {
 
+    @SuppressLint("HandlerLeak")
     public static Handler bluetoothHandler = new Handler() {
         public void handleMessage(android.os.Message msg) {
             if(msg.obj != null)
@@ -103,7 +105,7 @@ public class Activity_Raw extends AppCompatActivity {
     ServiceConnection BluetoothServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            msg("Service bound");
+            //msg("Service bound");
             serviceIsBound = true;
         }
 

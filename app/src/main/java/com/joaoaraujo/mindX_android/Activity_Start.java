@@ -18,12 +18,16 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
@@ -72,7 +76,7 @@ public class Activity_Start extends AppCompatActivity implements View.OnClickLis
 
         setContentView(R.layout.activity_start);
         findViewById(R.id.get_started_button).setOnClickListener(this);
-        writeThresholdsToFile(this);
+        readThresholdsFromFile();
         Activity_Raw.doUpdates = false;
 
         checkPermissions(); // check manifest permissions
@@ -361,6 +365,40 @@ public class Activity_Start extends AppCompatActivity implements View.OnClickLis
     }*/
 
 
+    private void readThresholdsFromFile() {
+        try {
+            FileInputStream fileIn=openFileInput("config.txt");
+            InputStreamReader InputRead= new InputStreamReader(fileIn);
+            BufferedReader bufferedReader = new BufferedReader(InputRead);
+
+            for(int i = 0; i < 6; i++){
+                String line = bufferedReader.readLine();
+                thresholds[i] = Double.parseDouble(line);
+            }
+
+            InputRead.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            FileInputStream fileIn=openFileInput("calcThrehsolds_decoder.txt");
+            InputStreamReader InputRead= new InputStreamReader(fileIn);
+            BufferedReader bufferedReader = new BufferedReader(InputRead);
+
+            for(int i = 0; i < 6; i++){
+                String line = bufferedReader.readLine();
+                thresholds[i] = Double.parseDouble(line);
+            }
+
+            InputRead.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void writeThresholdsToFile(Context context) {
         try {
 
@@ -369,6 +407,7 @@ public class Activity_Start extends AppCompatActivity implements View.OnClickLis
             for(int i = 0; i < thresholds_string.length; i++)
             {
                 thresholds_string[i] = String.valueOf(thresholds[i]);
+                thresholds_string[i] = thresholds_string[i] + "\n";
                 outputStreamWriter.write((thresholds_string[i]), 0, thresholds_string[i].length());
             }
             outputStreamWriter.close();

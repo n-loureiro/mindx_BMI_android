@@ -32,6 +32,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -60,6 +61,7 @@ public class Activity_Settings extends AppCompatActivity implements View.OnClick
         isReadyToStart = false;
 
         findViewById(R.id.btn_scan).setOnClickListener(this);
+        findViewById(R.id.btn_calcThresholds).setOnClickListener(this);
 
         attractor_bar = findViewById(R.id.attract_bar);
         attractor_string = findViewById(R.id.attract_text);
@@ -106,6 +108,10 @@ public class Activity_Settings extends AppCompatActivity implements View.OnClick
                 Utils.toast(getApplicationContext(), "Scanning for BLE headset...");
                  //ActivityKeepBluetooth.startScan();
                 break;
+            case R.id.btn_calcThresholds:
+                Intent intent = new Intent(this, Activity_CalcThresholds.class);
+                startActivity(intent);
+                break;
 
             default:
                 break;
@@ -117,12 +123,11 @@ public class Activity_Settings extends AppCompatActivity implements View.OnClick
         try {
             FileInputStream fileIn=openFileInput("config.txt");
             InputStreamReader InputRead= new InputStreamReader(fileIn);
+            BufferedReader bufferedReader = new BufferedReader(InputRead);
 
             for(int i = 0; i < 6; i++){
-                char[] inputBuffer = new char[Activity_Start.thresholds_string[i].length()];
-                InputRead.read(inputBuffer);
-                String threshold_string=String.copyValueOf(inputBuffer,0,Activity_Start.thresholds_string[i].length());
-                threshold_edit[i].setText(threshold_string);
+                String line = bufferedReader.readLine();
+                threshold_edit[i].setText(line);
                 threshold_edit[i].setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_NUMBER_FLAG_SIGNED);
             }
 
@@ -152,8 +157,31 @@ public class Activity_Settings extends AppCompatActivity implements View.OnClick
         //Activity_Menu.name_headset = this.name;
         Activity_Menu.attractor_weight = this.attractor_weight;
         Activity_Menu.thresholds = this.thresholds;
+
+        writeThresholdsToFile(this);
         //Utils.toast(getApplicationContext(), "Updating game variables remotely!");
         super.onBackPressed();
+    }
+
+    public static String[] thresholds_string;
+
+
+    private void writeThresholdsToFile(Context context) {
+        try {
+
+            thresholds_string = new String[thresholds.length];
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("config.txt", Context.MODE_PRIVATE));
+            for(int i = 0; i < thresholds_string.length; i++)
+            {
+                thresholds_string[i] = String.valueOf(thresholds[i]);
+                thresholds_string[i] = thresholds_string[i] + "\n";
+                outputStreamWriter.write((thresholds_string[i]), 0, thresholds_string[i].length());
+            }
+            outputStreamWriter.close();
+        }
+        catch (IOException e) {
+            Log.e("Exception", "File write failed: " + e.toString());
+        }
     }
 
 }
