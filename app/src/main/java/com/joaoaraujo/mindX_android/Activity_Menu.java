@@ -55,6 +55,12 @@ public class Activity_Menu extends AppCompatActivity implements View.OnClickList
                    return parent.expandGroup(groupPosition);
                 }
 
+                if(groupPosition == 1){
+                    Intent intent = new Intent(getApplicationContext(), com.joaoaraujo.mindX_android.Activity_Impedance.class);
+                    startActivity(intent);
+                    return true;
+                }
+
                 // Raw signals
                 if(groupPosition == 2)
                 {
@@ -114,7 +120,7 @@ public class Activity_Menu extends AppCompatActivity implements View.OnClickList
         listDataHeader.add("Games");
         listDataHeader.add("Impedance Check");
         listDataHeader.add("Raw Signals");
-        listDataHeader.add("My Stats");
+        listDataHeader.add("My Statistics");
 
         // Adding child data
         List<String> games = new ArrayList<String>();

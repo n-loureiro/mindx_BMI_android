@@ -76,6 +76,8 @@ public class BluetoothService extends Service {
             case 1:
                 mHandler = Activity_Games.getHandler();
                 break;
+            case 2:
+                mHandler = Activity_Impedance.getHandler();
 
         }
         return mBinder;
@@ -106,7 +108,7 @@ public class BluetoothService extends Service {
                 //if (bt.getAddress().equals("7C:F9:0E:F6:70:D4")) {
                 if (bt.getName().equals("MindreachBT") && bt.getAddress().equals("00:07:80:3C:55:04")) {
                     //msg("FOUND MINDREACH HEADSET");
-                    msg("Connecting to device...");
+                    //msg("Connecting to device...");
                     address = bt.getAddress();
                     connectToDevice(address);
                     break;
@@ -314,6 +316,14 @@ public class BluetoothService extends Service {
                     packet_size = 8;
                     buffer = new byte[packet_size];
                     handshakeByte = 0x07;
+                    break;
+
+                case 2: // Impedance mode
+                    start_byte[0] = 0x77;
+                    start_byte[1] = 0x63;
+                    packet_size = 24;
+                    buffer = new byte[packet_size];
+                    handshakeByte = 0x03;
                     break;
 
             }
