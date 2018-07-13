@@ -1,5 +1,6 @@
 package com.joaoaraujo.mindX_android;
 
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -27,6 +28,7 @@ import static java.lang.Math.random;
 
 public class Activity_Raw extends AppCompatActivity {
 
+    @SuppressLint("HandlerLeak")
     public static Handler bluetoothHandler = new Handler() {
         public void handleMessage(android.os.Message msg) {
             if(msg.obj != null)
@@ -63,7 +65,7 @@ public class Activity_Raw extends AppCompatActivity {
                         }
                     }
 
-                    double[] ordered_channels = new double[625];
+                    /*double[] ordered_channels = new double[625];
                     int channel_cursor = 1;
                     for(int i = 0; i < channel_id.length+1; i++){
 
@@ -76,7 +78,7 @@ public class Activity_Raw extends AppCompatActivity {
                             if(channel_cursor > 5)
                                 break;
                         }
-                    }
+                    }*/
                     //double [] channel_1 = new double[125];
                     //System.arraycopy(ordered_channels, 0, channel_1, 0, 125);
                     //Log.e("Mean Channel 1",Double.toString(mean(channel_1)));
