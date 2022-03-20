@@ -24,9 +24,15 @@ public class Activity_Menu extends AppCompatActivity implements View.OnClickList
 
     public static double[] thresholds = {3.9548, 2.2470, 1.0005, -0.9172, -2.1637, -3.8715};
     public static double attractor_weight = .4;
+    public static double voltage_limit = .1;
 
     public static final int BTLE_SERVICES = 2;
     public static String address_headset, name_headset;
+
+
+    public double getVoltageLimit(){
+        return voltage_limit;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
