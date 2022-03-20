@@ -121,11 +121,18 @@ public class Activity_Raw extends AppCompatActivity {
     private static final int max_datapoints = 2500; // maximum datapoints = 5 seconds
     private final int Fs = 500; // sampling freq
     public static boolean doUpdates;
+    public double voltage_limit = .06;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_raw);
+
+
+        //Activity_Menu appState = ((Activity_Menu)getApplicationContext());
+        //double voltage_limit = appState.getVoltageLimit();
 
         raw_eeg_graph1 = findViewById(R.id.ch_1);
         raw_eeg_graph1.getViewport().setScalable(true);
@@ -136,8 +143,8 @@ public class Activity_Raw extends AppCompatActivity {
         raw_eeg_graph1.getViewport().setYAxisBoundsManual(true);
         raw_eeg_graph1.getViewport().setMinX(1);
         raw_eeg_graph1.getViewport().setMaxX(max_datapoints);
-        raw_eeg_graph1.getViewport().setMinY(-0.1);
-        raw_eeg_graph1.getViewport().setMaxY(0.1);
+        raw_eeg_graph1.getViewport().setMinY(-voltage_limit);
+        raw_eeg_graph1.getViewport().setMaxY(voltage_limit);
         //raw_eeg_graph1.setTitle("EEG channel 1");
         raw_eeg_graph1.getGridLabelRenderer().setHorizontalLabelsVisible(false);
         raw_eeg_graph1.getGridLabelRenderer().setVerticalLabelsVisible(false);
@@ -151,12 +158,12 @@ public class Activity_Raw extends AppCompatActivity {
         raw_eeg_graph2.getViewport().setYAxisBoundsManual(true);
         raw_eeg_graph2.getViewport().setMinX(1);
         raw_eeg_graph2.getViewport().setMaxX(max_datapoints);
-        raw_eeg_graph2.getViewport().setMinY(-0.1);
-        raw_eeg_graph2.getViewport().setMaxY(0.1);
+        raw_eeg_graph2.getViewport().setMinY(-voltage_limit);
+        raw_eeg_graph2.getViewport().setMaxY(voltage_limit);
         //raw_eeg_graph2.setTitle("EEG channel 2");
         raw_eeg_graph2.getGridLabelRenderer().setHorizontalLabelsVisible(false);
         raw_eeg_graph2.getGridLabelRenderer().setVerticalLabelsVisible(false);
-
+//
         raw_eeg_graph3 = findViewById(R.id.ch_3);
         raw_eeg_graph3.getViewport().setScalable(true);
         raw_eeg_graph3.getViewport().setScalableY(true);
@@ -166,8 +173,8 @@ public class Activity_Raw extends AppCompatActivity {
         raw_eeg_graph3.getViewport().setYAxisBoundsManual(true);
         raw_eeg_graph3.getViewport().setMinX(1);
         raw_eeg_graph3.getViewport().setMaxX(max_datapoints);
-        raw_eeg_graph3.getViewport().setMinY(-0.1);
-        raw_eeg_graph3.getViewport().setMaxY(0.1);
+        raw_eeg_graph3.getViewport().setMinY(-voltage_limit);
+        raw_eeg_graph3.getViewport().setMaxY(voltage_limit);
         //raw_eeg_graph3.setTitle("EEG channel 3");
         raw_eeg_graph3.getGridLabelRenderer().setHorizontalLabelsVisible(false);
         raw_eeg_graph3.getGridLabelRenderer().setVerticalLabelsVisible(false);
@@ -181,8 +188,8 @@ public class Activity_Raw extends AppCompatActivity {
         raw_eeg_graph4.getViewport().setYAxisBoundsManual(true);
         raw_eeg_graph4.getViewport().setMinX(1);
         raw_eeg_graph4.getViewport().setMaxX(max_datapoints);
-        raw_eeg_graph4.getViewport().setMinY(-0.1);
-        raw_eeg_graph4.getViewport().setMaxY(0.1);
+        raw_eeg_graph4.getViewport().setMinY(-voltage_limit);
+        raw_eeg_graph4.getViewport().setMaxY(voltage_limit);
         //raw_eeg_graph4.setTitle("EEG channel 4");
         raw_eeg_graph4.getGridLabelRenderer().setHorizontalLabelsVisible(false);
         raw_eeg_graph4.getGridLabelRenderer().setVerticalLabelsVisible(false);
@@ -196,8 +203,8 @@ public class Activity_Raw extends AppCompatActivity {
         raw_eeg_graph5.getViewport().setYAxisBoundsManual(true);
         raw_eeg_graph5.getViewport().setMinX(1);
         raw_eeg_graph5.getViewport().setMaxX(max_datapoints);
-        raw_eeg_graph5.getViewport().setMinY(-0.1);
-        raw_eeg_graph5.getViewport().setMaxY(0.1);
+        raw_eeg_graph5.getViewport().setMinY(-voltage_limit);
+        raw_eeg_graph5.getViewport().setMaxY(voltage_limit);
         //raw_eeg_graph5.setTitle("EEG channel 5");
         raw_eeg_graph5.getGridLabelRenderer().setHorizontalLabelsVisible(false);
         raw_eeg_graph5.getGridLabelRenderer().setVerticalLabelsVisible(false);
@@ -208,7 +215,7 @@ public class Activity_Raw extends AppCompatActivity {
         raw_eeg_graph4.getGridLabelRenderer().setGridStyle( GridLabelRenderer.GridStyle.NONE );
         raw_eeg_graph5.getGridLabelRenderer().setGridStyle( GridLabelRenderer.GridStyle.NONE );
 
-
+//
 
         raw_eeg_series1 = new LineGraphSeries<>();
         raw_eeg_series2 = new LineGraphSeries<>();
@@ -343,7 +350,7 @@ public class Activity_Raw extends AppCompatActivity {
         DataPoint[] new_series3 = new DataPoint[max_datapoints];
         DataPoint[] new_series4 = new DataPoint[max_datapoints];
         DataPoint[] new_series5 = new DataPoint[max_datapoints];
-
+//
         for(int i = 0; i< max_datapoints; i++) {
             if (series_itr1.hasNext()){
                 new_series1[i] = (DataPoint) series_itr1.next();
@@ -363,7 +370,7 @@ public class Activity_Raw extends AppCompatActivity {
             DataPoint v2 = new DataPoint(new_series2[i].getX()-(datapoints-1),
                     new_series2[i].getY());
             new_series2[i-(datapoints-1)] = v2;
-
+//
             DataPoint v3 = new DataPoint(new_series3[i].getX()-(datapoints-1),
                     new_series3[i].getY());
             new_series3[i-(datapoints-1)] = v3;
