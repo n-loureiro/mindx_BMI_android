@@ -45,6 +45,8 @@ public class Activity_Start extends AppCompatActivity implements View.OnClickLis
     private double[] thresholds = {3.9548, 2.2470, 1.0005, -0.9172, -2.1637, -3.8715};
     public static String[] thresholds_string;
 
+    private double[] decoderHist = {};
+
     static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private static final String[] REQUIRED_SDK_PERMISSIONS = new String[]{
             Manifest.permission.BLUETOOTH,
@@ -387,10 +389,16 @@ public class Activity_Start extends AppCompatActivity implements View.OnClickLis
             InputStreamReader InputRead= new InputStreamReader(fileIn);
             BufferedReader bufferedReader = new BufferedReader(InputRead);
 
-            for(int i = 0; i < 6; i++){
-                String line = bufferedReader.readLine();
-                thresholds[i] = Double.parseDouble(line);
+            String line = "";
+
+            int i=0;
+            while ((line = bufferedReader.readLine()) != null) {
+                decoderHist[i] = Double.parseDouble(line);
+                    i++;
             }
+
+            Log.e("Decoder HIST: ",decoderHist.toString());
+
 
             InputRead.close();
 

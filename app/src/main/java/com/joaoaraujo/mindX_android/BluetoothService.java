@@ -30,7 +30,7 @@ import static com.joaoaraujo.mindX_android.Constants.TOAST;
 
 public class BluetoothService extends Service {
     private BluetoothAdapter mBluetoothAdapter;
-    public static final String BT_DEVICE = "MindreachBT";
+    public static final String BT_DEVICE = "mindreachBT";
     public static final String SPP_UUID = "00001101-0000-1000-8000-00805F9B34FB";
     public static final int STATE_NONE = 0; // we're doing nothing
     public static final int STATE_LISTEN = 1; // now listening for incoming
@@ -106,7 +106,7 @@ public class BluetoothService extends Service {
                 String name = bt.getName();
                 //check if the name and ID correspond to the arduino board
                 //if (bt.getAddress().equals("7C:F9:0E:F6:70:D4")) {
-                if (bt.getName().equals("MindreachBT") && bt.getAddress().equals("00:07:80:3C:55:04")) {
+                if (bt.getName().equals("mindreachBT") && bt.getAddress().equals("88:6B:0F:86:19:67")) {
                     //msg("FOUND MINDREACH HEADSET");
                     //msg("Connecting to device...");
                     address = bt.getAddress();

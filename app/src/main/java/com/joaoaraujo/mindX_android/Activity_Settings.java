@@ -43,12 +43,13 @@ import java.util.List;
 
 public class Activity_Settings extends AppCompatActivity implements View.OnClickListener {
 
-    SeekBar attractor_bar;
-    TextView attractor_string, connectFeedbackTextView;
+    SeekBar attractor_bar, voltage_bar;
+    TextView attractor_string, voltage_string, connectFeedbackTextView;
     EditText[] threshold_edit = new EditText[6];
 
     private double[] thresholds = {3.9548, 2.2470, 1.0005, -0.9172, -2.1637, -3.8715};
     private double attractor_weight = .4;
+    private double voltage_limit = .1;
 
     boolean isReadyToStart;
 
@@ -65,6 +66,8 @@ public class Activity_Settings extends AppCompatActivity implements View.OnClick
 
         attractor_bar = findViewById(R.id.attract_bar);
         attractor_string = findViewById(R.id.attract_text);
+        voltage_bar = findViewById(R.id.voltage_bar);
+        voltage_string = findViewById(R.id.voltage_text);
         connectFeedbackTextView = findViewById(R.id.connectFeedback);
 
         attractor_bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -76,6 +79,22 @@ public class Activity_Settings extends AppCompatActivity implements View.OnClick
                     attractor_string.setText("Attractor force: " + attractor_weight);
                 else
                     attractor_string.setText("Attractor force: " + attractor_weight + "0");
+            }
+            public void onStartTrackingTouch(SeekBar arg0) {
+            }
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+
+        voltage_bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
+
+                voltage_limit = ((double)progress/100.0);
+                if((voltage_limit*10.0) % 1 != 0)
+                    voltage_string.setText("Voltage Limit: " + voltage_limit);
+                else
+                    voltage_string.setText("Voltage Limit: " + voltage_limit + "0");
             }
             public void onStartTrackingTouch(SeekBar arg0) {
             }
@@ -131,6 +150,7 @@ public class Activity_Settings extends AppCompatActivity implements View.OnClick
                 threshold_edit[i].setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_NUMBER_FLAG_SIGNED);
             }
 
+
             InputRead.close();
 
         } catch (Exception e) {
@@ -156,6 +176,7 @@ public class Activity_Settings extends AppCompatActivity implements View.OnClick
         //Activity_Menu.address_headset = this.address;
         //Activity_Menu.name_headset = this.name;
         Activity_Menu.attractor_weight = this.attractor_weight;
+        Activity_Menu.voltage_limit = this.voltage_limit;
         Activity_Menu.thresholds = this.thresholds;
 
         writeThresholdsToFile(this);
@@ -164,6 +185,7 @@ public class Activity_Settings extends AppCompatActivity implements View.OnClick
     }
 
     public static String[] thresholds_string;
+
 
 
     private void writeThresholdsToFile(Context context) {
