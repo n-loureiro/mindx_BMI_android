@@ -187,11 +187,11 @@ public class Activity_Impedance extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public static void updateImpedance(double data, int channelId) {
 
-        if(channelId == 0){
+        if(channelId == 3){
                 textChn = textChn1;
                 buttonChn = buttonChn1;
             }
-        else if(channelId == 1){
+        else if(channelId == 4){
                 textChn = textChn2;
                 buttonChn = buttonChn2;
             }
@@ -199,7 +199,7 @@ public class Activity_Impedance extends AppCompatActivity {
                 textChn = textChn3;
                 buttonChn = buttonChn3;
             }
-        else if(channelId == 3){
+        else if(channelId == 1){
                 textChn = textChn4;
                 buttonChn = buttonChn4;
             }
@@ -210,9 +210,9 @@ public class Activity_Impedance extends AppCompatActivity {
 
         textChn.setText(Html.fromHtml(String.format("%.0f", Math.ceil(data/25)*25) + "k&#8486"));
 
-        if(data>50 && data < 100) {
+        if(data>8900 && data < 9800) {
             buttonChn.setBackgroundTintList( myContext.getResources().getColorStateList(android.R.color.holo_green_light));
-        } else if(data >=100 && data<500) {
+        } else if(data >=8000 && data<8900 || data>9800 && data < 10000) {
             buttonChn.setBackgroundTintList( myContext.getResources().getColorStateList(android.R.color.holo_orange_light));
         } else {
             buttonChn.setBackgroundTintList( myContext.getResources().getColorStateList(android.R.color.holo_red_light));
